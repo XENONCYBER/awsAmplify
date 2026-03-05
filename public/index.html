@@ -2,19 +2,61 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Simple Document Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document Vault</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>📁 Simple Document Vault</h1>
+    <div class="noise-overlay"></div>
+    
+    <main class="container">
+      <header class="header">
+        <div class="header-decoration"></div>
+        <h1 class="title">DOCUMENT<br/>VAULT</h1>
+        <p class="subtitle">AWS S3 STORAGE</p>
+      </header>
 
-    <div class="upload-section">
-      <input type="file" id="fileInput" />
-      <button onclick="uploadFile()">Upload</button>
-    </div>
+      <section class="upload-section">
+        <div class="upload-zone" id="dropZone">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="upload-text">DROP FILE HERE</p>
+          <p class="upload-or">— OR —</p>
+          <input type="file" id="fileInput" class="file-input" />
+          <label for="fileInput" class="file-label">BROWSE</label>
+          <p class="file-name" id="fileName"></p>
+        </div>
+        
+        <button class="upload-btn" id="uploadBtn" onclick="uploadFile()">
+          <span class="btn-text">UPLOAD</span>
+          <span class="btn-loading">UPLOADING...</span>
+        </button>
+      </section>
 
-    <h2>Uploaded Files</h2>
-    <ul id="fileList"></ul>
+      <section class="files-section">
+        <div class="section-header">
+          <h2 class="section-title">FILES</h2>
+          <span class="file-count" id="fileCount">0</span>
+        </div>
+        
+        <div class="files-grid" id="fileList">
+          <div class="empty-state">
+            <p>NO FILES UPLOADED</p>
+            <p class="empty-hint">Upload your first file above</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-line"></div>
+        <p>BRUTALIST DOCUMENT VAULT</p>
+      </footer>
+    </main>
 
     <script src="script.js"></script>
   </body>
