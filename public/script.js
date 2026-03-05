@@ -2,6 +2,7 @@ const fileInput = document.getElementById('fileInput');
 const fileNameDisplay = document.getElementById('fileName');
 const uploadBtn = document.getElementById('uploadBtn');
 const dropZone = document.getElementById('dropZone');
+const alertContainer = document.getElementById('alertContainer');
 
 fileInput.addEventListener('change', (e) => {
   if (e.target.files.length > 0) {
@@ -32,7 +33,7 @@ dropZone.addEventListener('drop', (e) => {
 function uploadFile() {
   const file = fileInput.files[0];
   if (!file) {
-    alert('SELECT A FILE FIRST');
+    showAlert('SELECT A FILE FIRST', 'error');
     return;
   }
 
@@ -48,7 +49,6 @@ function uploadFile() {
     body: formData,
   })
     .then(async (res) => {
-      console.log('Upload response status:', res.status);
       if (!res.ok) {
         const text = await res.text();
         let errorMsg;
@@ -67,13 +67,13 @@ function uploadFile() {
       uploadBtn.classList.remove('loading');
       fileInput.value = '';
       fileNameDisplay.textContent = '';
-      alert(msg);
+      showAlert('File uploaded successfully!', 'success');
       listFiles();
     })
     .catch((err) => {
       console.error('Upload error:', err);
       uploadBtn.classList.remove('loading');
-      alert('ERROR: ' + err.message);
+      showAlert('ERROR: ' + err.message, 'error');
     });
 }
 
@@ -141,9 +141,7 @@ function listFiles() {
       }
 
       files.forEach((f, index) => {
-        const card = document.createElement('a');
-        card.href = f.url;
-        card.target = '_blank';
+        const card = document.createElement('div');
         card.className = 'file-card';
         card.style.animationDelay = `${index * 0.1}s`;
         
@@ -152,6 +150,10 @@ function listFiles() {
         card.innerHTML = `
           <div class="file-card-icon">${icon}</div>
           <div class="file-card-name">${f.name}</div>
+          <div class="file-card-meta">${formatFileSize(f.size)}</div>
+          <div class="file-card-actions">
+            <button class="file-card-btn" onclick="downloadFile('${f.name.replace(/'/g, "\\'")}')">DOWNLOAD</button>
+          </div>
         `;
         
         fileList.appendChild(card);
@@ -159,7 +161,67 @@ function listFiles() {
     })
     .catch((err) => {
       console.error('List files error:', err);
-      alert('Error loading files: ' + err.message);
+      showAlert('Error loading files: ' + err.message, 'error');
+    });
+}
+
+function createAlert(type, message) {
+  const alert = document.createElement('div');
+  alert.className = `alert ${type}`;
+  alert.innerHTML = `
+    <div class="alert-title">${type.toUpperCase()}</div>
+    <div class="alert-message">${message}</div>
+    <button class="alert-close" onclick="this.parentElement.remove()">X</button>
+  `;
+  
+  setTimeout(() => {
+    alert.classList.add('show');
+  }, 100);
+  
+  setTimeout(() => {
+    alert.classList.remove('show');
+    setTimeout(() => {
+      alert.remove();
+    }, 300);
+  }, 5000);
+  
+  return alert;
+}
+
+function showAlert(message, type = 'info') {
+  const alert = createAlert(type, message);
+  alertContainer.appendChild(alert);
+}
+
+function downloadFile(filename) {
+  fetch(`/download/${encodeURIComponent(filename)}`)
+    .then(async (res) => {
+      if (!res.ok) {
+        const text = await res.text();
+        let errorMsg;
+        try {
+          const error = JSON.parse(text);
+          errorMsg = error.message || error.error || 'Download failed';
+        } catch {
+          errorMsg = text || 'Download failed';
+        }
+        throw new Error(errorMsg);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      const link = document.createElement('a');
+      link.href = data.url;
+      link.download = data.filename;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showAlert('Download started: ' + data.filename, 'success');
+    })
+    .catch((err) => {
+      console.error('Download error:', err);
+      showAlert('Download error: ' + err.message, 'error');
     });
 }
 

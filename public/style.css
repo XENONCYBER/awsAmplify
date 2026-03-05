@@ -10,6 +10,9 @@
   --border-light: #3d3d3d;
   --shadow-hard: 4px 4px 0 var(--text-charcoal);
   --shadow-hover: 2px 2px 0 var(--text-charcoal);
+  --alert-success: #00ff00;
+  --alert-error: #ff0000;
+  --alert-info: #0066ff;
 }
 
 * {
@@ -360,6 +363,32 @@ body {
   text-transform: uppercase;
 }
 
+.file-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.file-card-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--text-charcoal);
+  background: var(--text-charcoal);
+  color: var(--bg-cream);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.file-card-btn:hover {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: var(--text-charcoal);
+}
+
 .footer {
   margin-top: 80px;
   text-align: center;
@@ -378,6 +407,182 @@ body {
   letter-spacing: 0.25em;
   color: var(--text-muted);
   text-transform: uppercase;
+}
+
+/* Progress Bar Styles */
+.progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 240, 230, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.progress-container.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.progress-bar {
+  border: 2px solid var(--text-charcoal);
+  padding: 30px;
+  background: var(--bg-cream);
+  position: relative;
+  max-width: 400px;
+  width: 90%;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid var(--border-light);
+  pointer-events: none;
+}
+
+.progress-fill {
+  height: 20px;
+  background: var(--accent-orange);
+  width: 0%;
+  transition: width 0.3s ease;
+  border: 1px solid var(--text-charcoal);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: var(--accent-orange);
+  border: 1px solid var(--text-charcoal);
+  transform: rotate(45deg);
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+}
+
+.progress-label {
+  font-weight: bold;
+}
+
+.progress-percent {
+  color: var(--accent-orange);
+  font-weight: bold;
+}
+
+.progress-arrow {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid var(--accent-orange);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.progress-container.show .progress-arrow {
+  opacity: 1;
+}
+
+/* Alert Styles */
+.alert-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.alert {
+  border: 2px solid var(--text-charcoal);
+  padding: 20px 25px;
+  background: var(--bg-cream);
+  position: relative;
+  max-width: 400px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease;
+}
+
+.alert.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.alert.success {
+  border-left: 4px solid var(--alert-success);
+}
+
+.alert.error {
+  border-left: 4px solid var(--alert-error);
+}
+
+.alert.info {
+  border-left: 4px solid var(--alert-info);
+}
+
+.alert-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--text-charcoal);
+  background: var(--text-charcoal);
+  color: var(--bg-cream);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.alert-close:hover {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+}
+
+.alert-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.alert-message {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
 }
 
 @keyframes fadeInUp {
@@ -419,5 +624,13 @@ body {
   
   .title {
     font-size: 2.2rem;
+  }
+  
+  .progress-bar {
+    padding: 20px;
+  }
+  
+  .alert {
+    max-width: calc(100vw - 40px);
   }
 }

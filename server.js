@@ -62,7 +62,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
   });
 });
 
-// List files endpoint
+// List files endpoint with pre-signed URLs
 app.get("/files", (req, res) => {
   console.log("Fetching files from bucket:", BUCKET_NAME);
 
@@ -83,13 +83,39 @@ app.get("/files", (req, res) => {
       return res.json([]);
     }
 
-    const files = data.Contents.map((obj) => ({
-      name: obj.Key,
-      url: `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${obj.Key}`,
-    }));
+    // Generate pre-signed URLs for secure access
+    const files = data.Contents.map((obj) => {
+      const presignedUrl = s3.getSignedUrl("getObject", {
+        Bucket: BUCKET_NAME,
+        Key: obj.Key,
+        Expires: 3600, // URL expires in 1 hour
+      });
+
+      return {
+        name: obj.Key,
+        url: presignedUrl,
+        size: obj.Size,
+        lastModified: obj.LastModified,
+      };
+    });
 
     res.json(files);
   });
+});
+
+// Download endpoint - returns pre-signed URL for specific file
+app.get("/download/:filename", (req, res) => {
+  const filename = req.params.filename;
+  console.log("Generating download URL for:", filename);
+
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: filename,
+    Expires: 3600, // URL expires in 1 hour
+  };
+
+  const url = s3.getSignedUrl("getObject", params);
+  res.json({ url: url, filename: filename });
 });
 
 app.listen(port, () => {
