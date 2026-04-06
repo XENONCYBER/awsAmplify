@@ -6,25 +6,29 @@ const path = require("path");
 const app = express();
 const port = 3000;
 
-// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Configure AWS SDK
 require("dotenv").config();
 
-AWS.config.update({
-  region: process.env.AWS_REGION || "us-east-1",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// Backblaze B2 S3-Compatible API Configuration
+const B2_ENDPOINT = process.env.B2_ENDPOINT || "s3.us-west-004.backblazeb2.com";
+
+const s3 = new AWS.S3({
+  endpoint: `https://${B2_ENDPOINT}`,
+  accessKeyId: process.env.B2_APPLICATION_KEY_ID,
+  secretAccessKey: process.env.B2_APPLICATION_KEY,
+  s3ForcePathStyle: true, // Required for B2
+  signatureVersion: "v4",
 });
 
-const s3 = new AWS.S3();
-const BUCKET_NAME = "awsccritdemo";
+const BUCKET_NAME = process.env.B2_BUCKET_NAME;
 
-// Multer setup
+console.log("Using Backblaze B2 Storage");
+console.log("Endpoint:", B2_ENDPOINT);
+console.log("Bucket:", BUCKET_NAME);
+
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Upload endpoint
 app.post("/upload", upload.single("file"), (req, res) => {
   if (!req.file) {
     console.log("No file received in request");
@@ -36,7 +40,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
     req.file.originalname,
     "Size:",
     req.file.size,
-    "bytes"
+    "bytes",
   );
 
   const params = {
@@ -62,7 +66,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   });
 });
 
-// List files endpoint with pre-signed URLs
 app.get("/files", (req, res) => {
   console.log("Fetching files from bucket:", BUCKET_NAME);
 
@@ -83,12 +86,11 @@ app.get("/files", (req, res) => {
       return res.json([]);
     }
 
-    // Generate pre-signed URLs for secure access
     const files = data.Contents.map((obj) => {
       const presignedUrl = s3.getSignedUrl("getObject", {
         Bucket: BUCKET_NAME,
         Key: obj.Key,
-        Expires: 3600, // URL expires in 1 hour
+        Expires: 3600,
       });
 
       return {
@@ -103,7 +105,6 @@ app.get("/files", (req, res) => {
   });
 });
 
-// Download endpoint - returns pre-signed URL for specific file
 app.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
   console.log("Generating download URL for:", filename);
@@ -111,7 +112,7 @@ app.get("/download/:filename", (req, res) => {
   const params = {
     Bucket: BUCKET_NAME,
     Key: filename,
-    Expires: 3600, // URL expires in 1 hour
+    Expires: 3600,
   };
 
   const url = s3.getSignedUrl("getObject", params);

@@ -6,10 +6,8 @@ const path = require("path");
 const app = express();
 const port = 3000;
 
-// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Configure AWS SDK
 require("dotenv").config();
 
 AWS.config.update({
@@ -21,10 +19,8 @@ AWS.config.update({
 const s3 = new AWS.S3();
 const BUCKET_NAME = "awsccritdemo";
 
-// Multer setup
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Upload endpoint
 app.post("/upload", upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).send("No file uploaded");
 
@@ -45,7 +41,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   });
 });
 
-// List files endpoint with pre-signed URLs (for private buckets)
 app.get("/files", (req, res) => {
   s3.listObjectsV2({ Bucket: BUCKET_NAME }, (err, data) => {
     if (err) {
@@ -53,9 +48,7 @@ app.get("/files", (req, res) => {
       return res.status(500).send("Error listing files");
     }
 
-    // Generate pre-signed URLs for private access
     const files = data.Contents.map((obj) => {
-      // Pre-signed URL expires in 1 hour (3600 seconds)
       const url = s3.getSignedUrl("getObject", {
         Bucket: BUCKET_NAME,
         Key: obj.Key,
@@ -74,21 +67,19 @@ app.get("/files", (req, res) => {
   });
 });
 
-// Download endpoint with pre-signed URL
 app.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
 
   const params = {
     Bucket: BUCKET_NAME,
     Key: filename,
-    Expires: 3600, // URL expires in 1 hour
+    Expires: 3600,
   };
 
   const url = s3.getSignedUrl("getObject", params);
   res.json({ url });
 });
 
-// Delete endpoint (optional)
 app.delete("/delete/:filename", (req, res) => {
   const filename = req.params.filename;
 
