@@ -14,7 +14,7 @@ Doc Vault is a web-based document management system built with Node.js and Expre
 - **Backend**: Node.js, Express.js
 - **Storage**: AWS SDK (S3 compatible)
 - **File Handling**: Multer
-- **Frontend**: HTML5, CSS3, JavaScript
+- **Frontend**: React,JavaScript
 
 ## 📋 Prerequisites
 
